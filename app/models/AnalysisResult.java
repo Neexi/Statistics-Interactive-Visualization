@@ -29,10 +29,11 @@ public class AnalysisResult {
 
     public static AnalysisResult performBIAnalysis() throws IOException {
         List<PurchaseRecord> purchaseRecords = PurchaseRecord.loadFromFile();
+        RecordHandler rh = new RecordHandler(purchaseRecords);
         List<List<PurchaseRecord>> purchaseRecordsByDay = 
-        		RecordHandler.getRecordsByDay(purchaseRecords); //TODO : Maybe remove this later
+        		rh.getRecordsByDay(purchaseRecords); //TODO : Maybe remove this later
         List<List<PurchaseRecord>> purchaseRecordsByPatientID = 
-        		RecordHandler.getRecordsByPatientID(purchaseRecordsByDay);
+        		rh.getRecordsByPatientID(purchaseRecordsByDay);
         
         
         //Instantiate the map

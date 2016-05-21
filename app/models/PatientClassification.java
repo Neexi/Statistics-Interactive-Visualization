@@ -5,7 +5,7 @@ import java.util.List;
 import models.AnalysisResult.PatientType;
 
 /*
- * Analyzing the group that single patient belong to
+ * Analyzing the group that single patient belong to using 
  * Assuming single threaded
  * lock need to be implemented during analysis process otherwise
  */
@@ -28,7 +28,10 @@ public class PatientClassification {
 	//Weighting for decision tree, for now, let's leave it as 1 since there is no training data
 	private static final int vWeight = 1;
 	private static final int sWeight = 1;
-	//private static final int rIWeight = 1;
+	private static final int rIWeight = 1;
+	
+	//TODO : Improve accuracy with labeled training data
+	private static final double cutoff = 0.5;
 	
 	private PatientClassification() {
 		
@@ -93,35 +96,25 @@ public class PatientClassification {
 	}
 	
 	private static AnalysisResult.PatientType vCheck() {
+		double limit = cutoff; //Can be changed to Math.Random()
 		if(V == 0) return PatientType.VALID_NO_COMED;
 		else {
-			return (Math.random() > V * vWeight) ? rICheck() : PatientType.VIOLATED; 
+			return (limit > V * vWeight) ? rICheck() : PatientType.VIOLATED; 
 		}
 	}
 	
-	//TODO : Implement application of rIWeight
 	private static AnalysisResult.PatientType rICheck() {
-		double minDiff = Math.abs(R_I - 0);
-		String branch = "left";
-		if(minDiff > Math.abs(R_I - 0.5)) {
-			minDiff = Math.abs(R_I - 0.5);
-			branch = "middle";
-		}
-		if(minDiff > Math.abs(R_I - 1)) {
-			minDiff = Math.abs(R_I - 1);
-			branch = "right";
-		}
-		
-		switch(branch) {
-		    case("left") : return PatientType.VALID_I_TRIAL;
-		    case("middle") : return sCheck();
-		    case("right") : return PatientType.VALID_B_TRIAL;
-		    default : return PatientType.VIOLATED;
+		double limit = cutoff / 2; //Can be changed to Math.Random()
+		if(R_I < 0.5) {
+			return (limit > R_I * rIWeight) ? PatientType.VALID_I_TRIAL : sCheck();
+		} else {
+			return (limit > (1 - R_I) * rIWeight) ? PatientType.VALID_B_TRIAL : sCheck();
 		}
 	}
 	
 	private static AnalysisResult.PatientType sCheck() {
-		return (Math.random() > S * sWeight) ? m0Check() : PatientType.VIOLATED; 
+		double limit = cutoff; //Can be changed to Math.Random()
+		return (limit > S * sWeight) ? m0Check() : PatientType.VIOLATED; 
 	}
 	
 	private static AnalysisResult.PatientType m0Check() {

@@ -10,24 +10,30 @@ import java.util.List;
  */
 public class RecordHandler {
 	
-	//Based on information given by the CSV generator
-	public static final int dayOfYear = 365;
-	public static final int numPatient = 1000;
+	public int numDay;
+	public int numPatient;
 	
-	private RecordHandler() {
-		
+	public RecordHandler(List<PurchaseRecord> purchaseRecords) {
+		int maxDay = 0;
+		int maxPatientID = 0;
+		for(PurchaseRecord pr : purchaseRecords) {
+			maxDay = (maxDay < pr.day) ? pr.day : maxDay;
+			maxPatientID = (maxPatientID < pr.patientId) ? pr.patientId : maxPatientID;
+		}
+		numDay = maxDay + 1;
+		numPatient = maxPatientID + 1;
 	}
 	
 	/*
 	 * Create list of purchase records indexed by day
 	 */
-	public static List<List<PurchaseRecord>> getRecordsByDay(List<PurchaseRecord> purchaseRecords) {
-		List<List<PurchaseRecord>> purchaseRecordsByDay = new ArrayList<List<PurchaseRecord>>(dayOfYear);
-		for(int day = 0; day < dayOfYear; day++) {
+	public List<List<PurchaseRecord>> getRecordsByDay(List<PurchaseRecord> purchaseRecords) {
+		List<List<PurchaseRecord>> purchaseRecordsByDay = new ArrayList<List<PurchaseRecord>>(numDay);
+		for(int day = 0; day < numDay; day++) {
 			purchaseRecordsByDay.add(new LinkedList<PurchaseRecord>());
 		}
 		for(PurchaseRecord pr : purchaseRecords) {
-			if(pr.day > dayOfYear - 1 || pr.patientId > numPatient - 1) continue; //do not process bad record
+			if(pr.day > numDay - 1 || pr.patientId > numPatient - 1) continue; //do not process bad record
 			purchaseRecordsByDay.get(pr.day).add(pr);
 		}
 		return purchaseRecordsByDay;
@@ -36,7 +42,7 @@ public class RecordHandler {
 	/*
 	 * Create list of purchase records indexed by patient ID
 	 */
-	public static List<List<PurchaseRecord>> getRecordsByPatientID(List<List<PurchaseRecord>> purchaseRecordsByDay) {
+	public List<List<PurchaseRecord>> getRecordsByPatientID(List<List<PurchaseRecord>> purchaseRecordsByDay) {
 		List<List<PurchaseRecord>> purchaseRecordsByPatientID = new ArrayList<List<PurchaseRecord>>(numPatient);
 		for(int pat = 0; pat < numPatient; pat++) {
 			purchaseRecordsByPatientID.add(new LinkedList<PurchaseRecord>());
