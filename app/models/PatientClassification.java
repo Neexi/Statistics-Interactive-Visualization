@@ -25,19 +25,20 @@ public class PatientClassification {
 	private static final String medB = "B";
 	private static final int iDuration = 90;
 	private static final int bDuration = 30;
+	
+	//Currently the decision tree limit is a static constant for all decisions 
+	//TODO : Improve accuracy with labeled training data
+	private static final double cutoff = 0.5;
 	//Weighting for decision tree, for now, let's leave it as 1 since there is no training data
 	private static final int vWeight = 1;
 	private static final int sWeight = 1;
 	private static final int rIWeight = 1;
 	
-	//TODO : Improve accuracy with labeled training data
-	private static final double cutoff = 0.5;
-	
 	private PatientClassification() {
 		
 	}
 	
-	public static AnalysisResult.PatientType getClassification(List<PurchaseRecord> patientRecords) {
+	public static PatientType getClassification(List<PurchaseRecord> patientRecords) {
 		analyzed = false;
 		analyze(patientRecords);
 		return classify();
@@ -91,11 +92,11 @@ public class PatientClassification {
 	//-------------------------------------------------------------------------------------------------------------
 	//Decision tree function
 	
-	private static AnalysisResult.PatientType classify() {
+	private static PatientType classify() {
 		return analyzed ? vCheck() : PatientType.VALID_NO_COMED;
 	}
 	
-	private static AnalysisResult.PatientType vCheck() {
+	private static PatientType vCheck() {
 		double limit = cutoff; //Can be changed to Math.Random()
 		if(V == 0) return PatientType.VALID_NO_COMED;
 		else {
@@ -103,7 +104,7 @@ public class PatientClassification {
 		}
 	}
 	
-	private static AnalysisResult.PatientType rICheck() {
+	private static PatientType rICheck() {
 		double limit = cutoff / 2; //Can be changed to Math.Random()
 		if(R_I < 0.5) {
 			return (limit > R_I * rIWeight) ? PatientType.VALID_I_TRIAL : sCheck();
@@ -112,12 +113,12 @@ public class PatientClassification {
 		}
 	}
 	
-	private static AnalysisResult.PatientType sCheck() {
+	private static PatientType sCheck() {
 		double limit = cutoff; //Can be changed to Math.Random()
 		return (limit > S * sWeight) ? m0Check() : PatientType.VIOLATED; 
 	}
 	
-	private static AnalysisResult.PatientType m0Check() {
+	private static PatientType m0Check() {
 		return (M_0.equals(medI)) ? PatientType.VALID_IB_SWITCH : PatientType.VALID_BI_SWITCH;
 	}
 }

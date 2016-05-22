@@ -15,6 +15,8 @@
                 keyStrings['${patient.key.name}'] = count;
                 count++;
             #{/list}
+            
+            //PieChart
             google.load("visualization", "1", {packages:["corechart"]});
             google.setOnLoadCallback(drawChart);
             function drawChart() {
@@ -34,35 +36,39 @@
               // The select handler. Call the chart's getSelection() method
               function selectHandler() {
                 var keyString = data.getValue(chart.getSelection()[0].row, 0); 
-                window.location = "./type/"+keyStrings[keyString];
+                window.location = "./"+keyStrings[keyString];
               }
               
               //Add on click listener
               google.visualization.events.addListener(chart, 'select', selectHandler);
-              
               chart.draw(data, options);
+              
+              //Table
+              
             }
         </script>
     </head>
     <body>
         <p>
             <img src="/public/images/cat.png" height="42" width="42"> <span
-                class="greeting">O Hai,</span> <span class="sub-greeting">according
-            to your calculations... </span>
-        </p>
-        <table class="result">
-            #{list result.patients, as: 'patient'}
-            <tr>
-                <td class="desc">${patient.key.name}</td>
-                <td class="count">${patient.value}</td>
-            </tr>
-            #{/list}
-        </table>
-        <p>
-            <img src="/public/images/cat.png" height="42" width="42"> <span
                 class="greeting">Here,</span> <span class="sub-greeting">have
             a donut...</span>
         </p>
         <div id="piechart"></div>
+        <div id="table"></div>
+        <p>
+           <table class="result">
+           #{list patientsRecordList, as: 'patient'}
+           <tr>
+                <td class>
+                Patient number ${patient.get(0).patientId} : 
+               #{list patient, as: 'record'}
+                  ${record.day} ${record.medication}
+                  #{if !record_last}? #{/if}
+               #{/list}
+                </td>
+           </tr>
+           #{/list}
+        </p>
     </body>
 </html>
