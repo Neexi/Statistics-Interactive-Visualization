@@ -13,18 +13,22 @@ public class PurchaseRecord {
     private static final String MOCK_DATA_PATH = "./public/data.csv";
 
     public int day;
+    public int dayEnd; //End day of the medication, proper value will be assigned in patient analyzation
     public String medication;
     public int patientId;
+	
 
     public PurchaseRecord(String line) {
         String fields[] = line.split(",");
         day = Integer.parseInt(fields[0]);
+        dayEnd = day; //Give it value for now
         medication = fields[1];
         patientId = Integer.parseInt(fields[2]);
     }
 
     public PurchaseRecord(int day, String medication, int patientId) {
         this.day = day;
+        this.dayEnd = day; //Give it value for now
         this.medication = medication;
         this.patientId = patientId;
     }

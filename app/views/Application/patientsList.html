@@ -8,16 +8,12 @@
         <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
         <script type="text/javascript">
             var keyStrings = {};
+            var curDate = new Date();
             var count = 0;
             #{list result.patients, as: 'patient'}
-                //keyStrings.push('${patient.key.name}');
                 keyStrings['${patient.key.name}'] = count;
                 count++;
             #{/list}
-            
-            var medDuration = {};
-            medDuration['B'] = 30;
-            medDuration['I'] = 90;
             
             //PieChart
             google.charts.load('current', {'packages':['corechart', 'timeline']});
@@ -44,6 +40,7 @@
            	    var timelineData = new google.visualization.DataTable();
            	    timelineData.addColumn({ type: 'string', id: 'PatientID' });
            	    timelineData.addColumn({ type: 'string', id: 'Medicine' });
+           	    timelineData.addColumn({ type: 'string', role: 'tooltip' });
            	    timelineData.addColumn({ type: 'date', id: 'StartDay' });
            	    timelineData.addColumn({ type: 'date', id: 'EndDay' });
            	    timelineData.addRows([
@@ -51,22 +48,27 @@
                         #{list patient, as: 'record'}
                             ['${record.patientId}', 
                              '${record.medication}', 
-                             new Date(2016,0,${record.day} + 1), 
-                             new Date(2016,0,${record.day} + medDuration['${record.medication}'] + 1)]
+                             'Start : Day ' + ${record.day} +
+                             ', End : Day ' + ${record.dayEnd} + 
+                             ', treatment lasts for ' + String(${record.dayEnd} - ${record.day}) + ' days',
+                             new Date(curDate.getFullYear(),0,${record.day} + 1), 
+                             new Date(curDate.getFullYear(),0,${record.dayEnd} + 1)]
                             #{if !record_last},#{/if}
            	            #{/list}
            	        #{/list}
            	    ]);
            	    
-           	    var chartHeight = 100 * ${recordSize};
+           	    var chartHeight = 80 * ${recordSize};
            	    
            	    var timelineOptions = {
            	    	width: 1000,
            	        height: chartHeight,
+           	        avoidOverlappingGridLines: true,
            	        hAxis: {
-           	        	minValue: new Date(2016, 0, 1),
-           	            maxValue: new Date(2016, 11, 31)
-           	        } 
+           	        	minValue: new Date(curDate.getFullYear(), 0, 1),
+           	            maxValue: new Date(curDate.getFullYear(), 11, 31)
+           	        },
+           	        tooltip: {isHtml: true}
            	    }
               
                 var chart = new google.visualization.PieChart(document.getElementById('piechart'));
@@ -87,6 +89,10 @@
             a donut...</span>
         </p>
         <div id="piechart"></div>
+         <p>
+            <img src="/public/images/cat.png" height="42" width="42">
+            <span class="sub-greeting">Year 2016 Table for ${typeString}</span>
+        </p>
         <div id="timeline"></div>
     </body>
 </html>

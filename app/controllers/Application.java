@@ -19,7 +19,8 @@ public class Application extends Controller {
     	List<List<PurchaseRecord>> patientsRecordList = 
     			AnalysisResult.getPatientsListByTypeID(result, Integer.parseInt(id));
     	int recordSize = patientsRecordList.size();
-        render(result, patientsRecordList, recordSize);
+    	String typeString = AnalysisResult.getPatientsTypeStringByTypeID(Integer.parseInt(id));
+        render(result, patientsRecordList, recordSize, typeString);
     }
 
     // you can ignore, this just generates the data.csv file that was provided

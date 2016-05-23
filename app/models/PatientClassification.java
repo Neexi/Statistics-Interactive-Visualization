@@ -25,6 +25,7 @@ public class PatientClassification {
 	private static final String medB = "B";
 	private static final int iDuration = 90;
 	private static final int bDuration = 30;
+	private static final int dayInYear = 365;
 	
 	//Currently the decision tree limit is a static constant for all decisions 
 	//TODO : Improve accuracy with labeled training data
@@ -64,6 +65,8 @@ public class PatientClassification {
 		int lastDay = 0;
 		String lastMed = M_0;
 		
+		PurchaseRecord prevB = null;
+		PurchaseRecord prevI = null;
 		for(PurchaseRecord r : patientRecords) {
 			if(r.medication.equals(medI)) {
 				curIDuration = Math.max(0, curIDuration - (r.day - lastDay));
@@ -72,12 +75,22 @@ public class PatientClassification {
 				sCount = (lastMed.equals(medB)) ? sCount + 1 : sCount;
 				curIDuration = iDuration;
 				iCount++;
+				r.dayEnd = Math.min(r.day + iDuration, dayInYear);
+				if(prevI != null) {
+					prevI.dayEnd = Math.min(prevI.dayEnd, r.day);
+				}
+				prevI = r;
 			} else {
 				curIDuration = Math.max(0, curIDuration - (r.day - lastDay));
 				curBDuration = Math.max(0, curBDuration - (r.day - lastDay));
 				vCount = (curIDuration > 0) ? vCount + 1 : vCount;
 				sCount = (lastMed.equals(medI)) ? sCount + 1 : sCount;
 				curBDuration = bDuration;
+				r.dayEnd = Math.min(r.day + bDuration, dayInYear);
+				if(prevB != null) {
+					prevB.dayEnd = Math.min(prevB.dayEnd, r.day);
+				}
+				prevB = r;
 			}
 			lastDay = r.day;
 			lastMed = r.medication;

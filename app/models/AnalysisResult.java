@@ -30,8 +30,6 @@ public class AnalysisResult {
     //TODO : use database instead to store this information?
     //Doc URL : https://www.playframework.com/documentation/1.3.x/configuration#dbconf
     
-    //Implementation with map
-    //public Map<String, Map<Integer, List<PurchaseRecord>>> patientsList =  new HashMap<String, Map<Integer, List<PurchaseRecord>>>();
     //Implementation with list
     public Map<PatientType, List<List<PurchaseRecord>>> patientsList =  new HashMap<PatientType, List<List<PurchaseRecord>>>();
     public int numRecords;
@@ -108,6 +106,32 @@ public class AnalysisResult {
     	    	res = null;
     	}
     	return res;
-
+    }
+    
+    public static String getPatientsTypeStringByTypeID(int typeID) {
+    	String res;
+    	switch(typeID) {
+    	    case(0) : 
+    	    	res = PatientType.VIOLATED.name;
+    	        break;
+    	    case(1) : 
+    	    	res = PatientType.VALID_NO_COMED.name;
+    	        break;
+    	    case(2) : 
+    	    	res = PatientType.VALID_BI_SWITCH.name;
+    	        break;
+    	    case(3) : 
+    	    	res = PatientType.VALID_IB_SWITCH.name;
+    	        break;
+    	    case(4) : 
+    	    	res = PatientType.VALID_I_TRIAL.name;
+    	        break;
+    	    case(5) : 
+    	    	res = PatientType.VALID_B_TRIAL.name;
+    	        break;
+    	    default : 
+    	    	res = "";
+    	}
+    	return res;
     }
 }
