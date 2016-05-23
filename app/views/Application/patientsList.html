@@ -47,7 +47,7 @@
                     #{list patientsRecordList, as: 'patient'}
                         #{list patient, as: 'record'}
                             ['${record.patientId}', 
-                             '${record.medication}', 
+                             '${record.recordTag}', 
                              'Start : Day ' + ${record.day} +
                              ', End : Day ' + ${record.dayEnd} + 
                              ', treatment lasts for ' + String(${record.dayEnd} - ${record.day}) + ' days',
@@ -61,7 +61,7 @@
            	    var chartHeight = 80 * ${recordSize};
            	    
            	    var timelineOptions = {
-           	    	width: 1000,
+           	    	width: 1800,
            	        height: chartHeight,
            	        avoidOverlappingGridLines: true,
            	        hAxis: {

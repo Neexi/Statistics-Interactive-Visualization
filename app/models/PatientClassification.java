@@ -1,5 +1,6 @@
 package models;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import models.AnalysisResult.PatientType;
@@ -19,6 +20,13 @@ public class PatientClassification {
 	private static String M_0; //First medicine taken by the patient
 	
 	private static boolean analyzed;
+	
+	//Record list for special tagging
+	private static List<PurchaseRecord> violatingRecords;
+	private static List<PurchaseRecord> switchIBRecords;
+	private static List<PurchaseRecord> switchBIRecords;
+	private static List<PurchaseRecord> iRecords;
+	private static List<PurchaseRecord> bRecords;
 	
 	//Constant
 	private static final String medI = "I";
@@ -41,8 +49,17 @@ public class PatientClassification {
 	
 	public static PatientType getClassification(List<PurchaseRecord> patientRecords) {
 		analyzed = false;
+		violatingRecords = new LinkedList<PurchaseRecord>();
+		switchIBRecords = new LinkedList<PurchaseRecord>();
+		switchBIRecords = new LinkedList<PurchaseRecord>();
+		iRecords = new LinkedList<PurchaseRecord>();
+		bRecords = new LinkedList<PurchaseRecord>();
 		analyze(patientRecords);
-		return classify();
+		PatientType classification = classify();
+		//TODO : Do something for the tag here
+		specialTagging(classification);
+		clearAll();
+		return classification;
 	}
 	
 	/*
@@ -69,10 +86,20 @@ public class PatientClassification {
 		PurchaseRecord prevI = null;
 		for(PurchaseRecord r : patientRecords) {
 			if(r.medication.equals(medI)) {
+				iRecords.add(r);
 				curIDuration = Math.max(0, curIDuration - (r.day - lastDay));
 				curBDuration = Math.max(0, curBDuration - (r.day - lastDay));
-				vCount = (curBDuration > 0) ? vCount + 1 : vCount;
-				sCount = (lastMed.equals(medB)) ? sCount + 1 : sCount;
+				if(curBDuration > 0) {
+					vCount++;
+					violatingRecords.add(r);
+					violatingRecords.add(prevB);
+				}
+				if(lastMed.equals(medB)) {
+					sCount++;
+					switchBIRecords.add(r);
+				}
+				//vCount = (curBDuration > 0) ? vCount + 1 : vCount;
+				//sCount = (lastMed.equals(medB)) ? sCount + 1 : sCount;
 				curIDuration = iDuration;
 				iCount++;
 				r.dayEnd = Math.min(r.day + iDuration, dayInYear);
@@ -81,10 +108,20 @@ public class PatientClassification {
 				}
 				prevI = r;
 			} else {
+				bRecords.add(r);
 				curIDuration = Math.max(0, curIDuration - (r.day - lastDay));
 				curBDuration = Math.max(0, curBDuration - (r.day - lastDay));
-				vCount = (curIDuration > 0) ? vCount + 1 : vCount;
-				sCount = (lastMed.equals(medI)) ? sCount + 1 : sCount;
+				if(curIDuration > 0) {
+					vCount++;
+					violatingRecords.add(r);
+					violatingRecords.add(prevI);
+				}
+				if(lastMed.equals(medI)) {
+					sCount++;
+					switchIBRecords.add(r);
+				}
+				//vCount = (curIDuration > 0) ? vCount + 1 : vCount;
+				//sCount = (lastMed.equals(medI)) ? sCount + 1 : sCount;
 				curBDuration = bDuration;
 				r.dayEnd = Math.min(r.day + bDuration, dayInYear);
 				if(prevB != null) {
@@ -100,6 +137,35 @@ public class PatientClassification {
 		S = (double)sCount / (double)T;
 		R_I = (double)iCount / (double)T;
 		analyzed = true;
+	}
+	
+	public static void specialTagging(PatientType classification) {
+		switch(classification) {
+		    case VIOLATED :
+		    	for(PurchaseRecord pr : violatingRecords) pr.recordTag = "Violating " + pr.medication;
+		    	break;
+		    case VALID_IB_SWITCH:
+		    	for(PurchaseRecord pr : switchIBRecords) pr.recordTag = "Switching " + pr.medication;
+		    	break;
+		    case VALID_BI_SWITCH:
+		    	for(PurchaseRecord pr : switchBIRecords) pr.recordTag = "Switching " + pr.medication;
+		    	break;
+		    case VALID_I_TRIAL:
+		    	for(PurchaseRecord pr : iRecords) pr.recordTag = "Trial " + pr.medication;
+		    	break;
+		    case VALID_B_TRIAL:
+		    	for(PurchaseRecord pr : bRecords) pr.recordTag = "Trial " + pr.medication;
+		    	break;
+		    default: return;
+		}
+	}
+	
+	public static void clearAll() {
+		violatingRecords.clear();
+		switchIBRecords.clear();
+		switchBIRecords.clear();
+		iRecords.clear();
+		bRecords.clear();
 	}
 	
 	//-------------------------------------------------------------------------------------------------------------

@@ -16,6 +16,7 @@ public class PurchaseRecord {
     public int dayEnd; //End day of the medication, proper value will be assigned in patient analyzation
     public String medication;
     public int patientId;
+    public String recordTag; //Tag for timeline to distinguish special record
 	
 
     public PurchaseRecord(String line) {
@@ -24,6 +25,7 @@ public class PurchaseRecord {
         dayEnd = day; //Give it value for now
         medication = fields[1];
         patientId = Integer.parseInt(fields[2]);
+        recordTag = medication;
     }
 
     public PurchaseRecord(int day, String medication, int patientId) {
@@ -31,6 +33,7 @@ public class PurchaseRecord {
         this.dayEnd = day; //Give it value for now
         this.medication = medication;
         this.patientId = patientId;
+        this.recordTag = medication;
     }
 
     public static List<PurchaseRecord> loadFromFile() throws IOException {
