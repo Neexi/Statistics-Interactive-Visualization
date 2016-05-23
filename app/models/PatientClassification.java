@@ -70,14 +70,14 @@ public class PatientClassification {
 				curBDuration = Math.max(0, curBDuration - (r.day - lastDay));
 				vCount = (curBDuration > 0) ? vCount + 1 : vCount;
 				sCount = (lastMed.equals(medB)) ? sCount + 1 : sCount;
-				curIDuration += iDuration;
+				curIDuration = iDuration;
 				iCount++;
 			} else {
 				curIDuration = Math.max(0, curIDuration - (r.day - lastDay));
 				curBDuration = Math.max(0, curBDuration - (r.day - lastDay));
 				vCount = (curIDuration > 0) ? vCount + 1 : vCount;
 				sCount = (lastMed.equals(medI)) ? sCount + 1 : sCount;
-				curBDuration += bDuration;
+				curBDuration = bDuration;
 			}
 			lastDay = r.day;
 			lastMed = r.medication;

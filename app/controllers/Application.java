@@ -18,7 +18,8 @@ public class Application extends Controller {
     	AnalysisResult result = AnalysisResult.performBIAnalysis();
     	List<List<PurchaseRecord>> patientsRecordList = 
     			AnalysisResult.getPatientsListByTypeID(result, Integer.parseInt(id));
-        render(result, patientsRecordList);
+    	int recordSize = patientsRecordList.size();
+        render(result, patientsRecordList, recordSize);
     }
 
     // you can ignore, this just generates the data.csv file that was provided

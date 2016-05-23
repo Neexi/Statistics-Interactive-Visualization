@@ -5,9 +5,8 @@
             href="@{'/public/stylesheets/main.css'}">
         <link rel="shortcut icon" type="image/png"
             href="@{'/public/images/favicon.png'}">
-        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
         <script type="text/javascript">
-        
             var keyStrings = {};
             var count = 0;
             #{list result.patients, as: 'patient'}
@@ -16,36 +15,69 @@
                 count++;
             #{/list}
             
+            var medDuration = {};
+            medDuration['B'] = 30;
+            medDuration['I'] = 90;
+            
             //PieChart
-            google.load("visualization", "1", {packages:["corechart"]});
-            google.setOnLoadCallback(drawChart);
+            google.charts.load('current', {'packages':['corechart', 'timeline']});
+            google.charts.setOnLoadCallback(drawChart);
             function drawChart() {
-              var data = google.visualization.arrayToDataTable([
-                ['Type', 'Patient'],
-                #{list result.patients, as: 'patient'}
-                	['${patient.key.name}', ${patient.value}]
-                	#{if !patient_last},#{/if}
-                #{/list}
-              ]);	
-              var options = {
-                title: 'B & I Analysis Result',
-                pieHole: 0.4
-              };	
-              var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+                var data = google.visualization.arrayToDataTable([
+                    ['Type', 'Patient'],
+                    #{list result.patients, as: 'patient'}
+                	    ['${patient.key.name}', ${patient.value}]
+                	    #{if !patient_last},#{/if}
+                    #{/list}
+                ]);	
+                var options = {
+                    title: 'B & I Analysis Result',
+                    pieHole: 0.4
+                };	
               
-              // The select handler. Call the chart's getSelection() method
-              function selectHandler() {
-                var keyString = data.getValue(chart.getSelection()[0].row, 0); 
-                window.location = "./"+keyStrings[keyString];
-              }
+                // The select handler. Call the chart's getSelection() method
+                function selectHandler() {
+                    var keyString = data.getValue(chart.getSelection()[0].row, 0); 
+                    window.location = "./"+keyStrings[keyString];
+                }
+                
+           	    var timelineData = new google.visualization.DataTable();
+           	    timelineData.addColumn({ type: 'string', id: 'PatientID' });
+           	    timelineData.addColumn({ type: 'string', id: 'Medicine' });
+           	    timelineData.addColumn({ type: 'date', id: 'StartDay' });
+           	    timelineData.addColumn({ type: 'date', id: 'EndDay' });
+           	    timelineData.addRows([
+                    #{list patientsRecordList, as: 'patient'}
+                        #{list patient, as: 'record'}
+                            ['${record.patientId}', 
+                             '${record.medication}', 
+                             new Date(2016,0,${record.day} + 1), 
+                             new Date(2016,0,${record.day} + medDuration['${record.medication}'] + 1)]
+                            #{if !record_last},#{/if}
+           	            #{/list}
+           	        #{/list}
+           	    ]);
+           	    
+           	    var chartHeight = 100 * ${recordSize};
+           	    
+           	    var timelineOptions = {
+           	    	width: 1000,
+           	        height: chartHeight,
+           	        hAxis: {
+           	        	minValue: new Date(2016, 0, 1),
+           	            maxValue: new Date(2016, 11, 31)
+           	        } 
+           	    }
               
-              //Add on click listener
-              google.visualization.events.addListener(chart, 'select', selectHandler);
-              chart.draw(data, options);
-              
-              //Table
-              
+                var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+           	    var timeline = new google.visualization.Timeline(document.getElementById('timeline'));
+                
+                //Add on click listener
+                google.visualization.events.addListener(chart, 'select', selectHandler);
+                chart.draw(data, options);
+                timeline.draw(timelineData, timelineOptions);
             }
+                
         </script>
     </head>
     <body>
@@ -55,20 +87,6 @@
             a donut...</span>
         </p>
         <div id="piechart"></div>
-        <div id="table"></div>
-        <p>
-           <table class="result">
-           #{list patientsRecordList, as: 'patient'}
-           <tr>
-                <td class>
-                Patient number ${patient.get(0).patientId} : 
-               #{list patient, as: 'record'}
-                  ${record.day} ${record.medication}
-                  #{if !record_last}? #{/if}
-               #{/list}
-                </td>
-           </tr>
-           #{/list}
-        </p>
+        <div id="timeline"></div>
     </body>
 </html>
